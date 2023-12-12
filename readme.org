@@ -1,0 +1,65 @@
+* Overview
+
+This is an adaptation of the algorithm and code provide in
+https://github.com/daenuprobst/molzip.git.
+
+The algorithm is also describe in the paper: Jiang, Zhiying, et al. "Less is
+More: Parameter-Free Text Classification with Gzip." arXiv preprint
+arXiv:2212.09410 (2022).
+
+Two methods are proposed, 1) is for the regression whereas the 2) is a PCA
+projection using only the smiles.
+
+** Requirements
+tested with python 3.10 with gzip, numpy and sklearn.
+
+* Regression using gzip
+
+Perform the regression using a simpler implementation of molzip.
+
+#+begin_src python
+from molzip_simple import regression
+import pandas as pd
+import matplotlib.pyplot as plt
+from numpy.random import choice
+from numpy import column_stack
+
+# prepare the data, training and validation
+df = pd.read_csv("solubility_dataset.csv")
+smiles, sol_val = df['SMILES'], df['Solubility'].values
+train_id = choice(range(df.shape[0]), int(df.shape[0]*0.8))
+val_id = [i for i in range(df.shape[0]) if i not in train_id]
+train_smiles, train_sol = smiles[train_id], sol_val[train_id]
+val_smiles, val_sol = smiles[val_id], sol_val[val_id]
+
+pred = regression(val_smiles, train_smiles, train_sol, k=10)
+
+plt.scatter(val_sol, pred)
+plt.show()
+#+end_src
+
+#+RESULTS:
+: None
+
+* Projection using gzip
+
+Perform a PCA projection using the distance matrix computed by molzip.
+
+#+begin_src python
+from molzip_simple import projection
+import pandas as pd
+import matplotlib.pyplot as plt
+from numpy.random import choice
+
+# prepare the data
+df = pd.read_csv("solubility_dataset.csv")
+smiles, sol_val = df['SMILES'], df['Solubility'].values
+
+proj = projection(smiles)
+
+plt.scatter(proj[:, 0], proj[:, 1], c=sol_val)
+plt.show()
+#+end_src
+
+#+RESULTS:
+: None
